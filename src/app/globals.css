@@ -1,0 +1,492 @@
+/* INDIA'S JOURNEY BEYOND EARTH — Global Styles */
+@import "tailwindcss";
+
+/* ── Local fonts ──────────────────────────────────────────────────────
+   Every typeface on the site — Orbitron (display), IBM Plex Mono
+   (technical), and Space Grotesk (UI + body) — is self-hosted from
+   public/fonts/ via @font-face here (all SIL OFL). There is no
+   next/font/google usage anywhere in the app: Space Grotesk now also
+   serves as the body/general-prose face (Inter via next/font/google has
+   been removed so the entire site draws only from public/fonts/).
+   public/fonts/Space Grotesk/ previously held a
+   mislabeled personal-use-only trial typeface ("TT Interphases Pro Trial",
+   1001Fonts FFP EULA) and was replaced with the genuine Space Grotesk
+   v2.0.0 (SIL OFL 1.1, see OFL.txt). */
+@font-face {
+  font-family: "Orbitron";
+  src: url("/fonts/Orbitron/webfonts/orbitron-light-webfont.woff") format("woff"),
+       url("/fonts/Orbitron/webfonts/orbitron-light-webfont.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Orbitron";
+  src: url("/fonts/Orbitron/webfonts/orbitron-medium-webfont.woff") format("woff"),
+       url("/fonts/Orbitron/webfonts/orbitron-medium-webfont.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Orbitron";
+  src: url("/fonts/Orbitron/webfonts/orbitron-bold-webfont.woff") format("woff"),
+       url("/fonts/Orbitron/webfonts/orbitron-bold-webfont.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Orbitron";
+  src: url("/fonts/Orbitron/webfonts/orbitron-black-webfont.woff") format("woff"),
+       url("/fonts/Orbitron/webfonts/orbitron-black-webfont.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-ThinItalic.ttf") format("truetype");
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-ExtraLightItalic.ttf") format("truetype");
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-SemiBoldItalic.ttf") format("truetype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono Local";
+  src: url("/fonts/IBM%20Plex%20Mono/IBMPlexMono-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Space Grotesk (UI) — genuine v2.0.0, SIL OFL 1.1. Variable font covering
+   weights 300–700 (incl. 600 SemiBold) used by the UI face; single 49 KB
+   woff2, font-display: swap. Files from public/fonts/Space Grotesk/. */
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/Space%20Grotesk/SpaceGrotesk-VF.woff2") format("woff2-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Custom space theme — near-black background, electric-blue accents */
+:root {
+  --color-space: #000000;
+  --color-nebula-blue: #0a1428;
+  --color-nebula-purple: #1a0a3a;
+  --color-accent: #00d4ff;
+  --color-accent-violet: #8a2be2;
+  --color-earth-blue: #0a3d62;
+  --color-earth-green: #1a7f37;
+  --color-india-glow: #ff9933;
+
+  /* Satellite status colors */
+  --color-status-operational: #10b981;
+  --color-status-completed: #3b82f6;
+  --color-status-partial: #f59e0b;
+  --color-status-non-operational: #ea580c;
+  --color-status-failed: #ef4444;
+  --color-status-retired: #374151;
+  --color-status-future: #a855f7;
+
+  /* ── Three-tier typography system (Sections #49–56) ──
+     display  — Orbitron (local): hero title, satellite names, mission
+                years, major numeric values, timeline markers
+     ui       — Space Grotesk (local OFL @font-face): nav, buttons, section
+                headings, mission descriptions
+     mono     — IBM Plex Mono (local): technical HUD, specs, coordinates,
+                loading text
+     body     — Space Grotesk (local OFL @font-face): general prose
+     All four faces load from public/fonts/ only — no next/font/google,
+     no Google Fonts requests, no restricted/trial fonts. */
+  --font-display: "Orbitron", system-ui, sans-serif;
+  --font-ui: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono Local", ui-monospace, monospace;
+  --font-technical: var(--font-mono);
+
+  /* Mission-control panels read as instrument hardware, not app chrome —
+     corners stay near-square (a thin chamfer, not a rounded "card") and
+     brackets/hairlines carry the framing instead of shadows/blur alone. */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.1875rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+
+  --color-hud-line: rgba(0, 212, 255, 0.35);
+  --color-hud-grid: rgba(148, 163, 184, 0.06);
+}
+
+/* Explicit selector-based font rules (Section #51) — written directly
+   rather than relying on Tailwind's @theme auto-utility generation,
+   since the design tokens above live in :root (moved there from @theme
+   inline for editor compatibility, see state.json 19_visualDesign), and
+   Tailwind v4 only auto-generates utilities from @theme-scoped tokens. */
+.font-display {
+  font-family: var(--font-display);
+}
+.font-ui {
+  font-family: var(--font-ui);
+}
+
+/* Reduce default body margins and set the cosmic background */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-space);
+  color: #e5e7eb;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scroll bar — minimal, space-themed */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a5a;
+}
+
+/* Canvas container — hide when reduced motion and no-JS fallback */
+.no-js .canvas-container {
+  display: none;
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Glassmorphism panel ──────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(10, 12, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 0 40px rgba(0, 212, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ── Satellite glow on hover ──────────────────────────────────────────── */
+.satellite-glow {
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6))
+          drop-shadow(0 0 24px rgba(138, 43, 226, 0.3));
+}
+
+/* ── Mission-control instrument panel ─────────────────────────────────
+   Replaces heavy neon/glassmorphism framing for data-bearing surfaces
+   (telemetry HUD, satellite spec sheets, filter rails) with a flat,
+   near-square panel plus a faint fixed-pitch grid — the same visual
+   grammar as an observatory console or ISRO mission control readout,
+   rather than a glowing app card. Corner brackets (below) carry the
+   framing instead of blur/box-shadow bloom. */
+.hud-panel {
+  position: relative;
+  background:
+    linear-gradient(var(--color-hud-grid) 1px, transparent 1px) 0 0 / 100% 16px,
+    linear-gradient(90deg, var(--color-hud-grid) 1px, transparent 1px) 0 0 / 16px 100%,
+    rgba(6, 9, 18, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-md);
+}
+
+/* Four L-shaped corner brackets — the recurring framing device for HUD /
+   reticle / instrument-panel surfaces throughout the journey, used in
+   place of rounded corners + drop-shadow glow. Apply alongside .hud-panel
+   or standalone on any element that needs a "targeting reticle" frame
+   (e.g. the satellite hover label, active-mission markers). */
+.hud-bracket {
+  position: relative;
+}
+.hud-bracket::before,
+.hud-bracket::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--color-hud-line);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.hud-bracket::before {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+}
+.hud-bracket::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+/* Technical readout text — tabular figures, wide tracking, mono face.
+   Use for every numeric telemetry value (altitude, velocity, inclination,
+   coordinates) so data reads as instrument output rather than UI copy. */
+.font-technical {
+  font-family: var(--font-mono, var(--font-technical));
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* ── Animations ───────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* HUD-style text materialize — used for mission/phase title text at
+   every journey transition (JourneyOverlay.tsx's launch-label and
+   active-satellite headings). Combines a soft blur-in, a slight upward
+   settle, and a brief letter-spacing pull-in so new mission text reads
+   as an instrument readout resolving into focus rather than a plain
+   opacity crossfade — distinct from the generic fade-in-up used
+   elsewhere for overlay panels. animate-fade-in was previously
+   referenced in JourneyOverlay.tsx with no matching class defined here,
+   so phase-title text had no transition effect at all; this both
+   defines it and gives it its own identity instead of duplicating
+   fade-in-up. */
+@keyframes text-materialize {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+    letter-spacing: 0.08em;
+  }
+  60% {
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    letter-spacing: normal;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes satellite-disintegrate {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  40% { opacity: 0.6; transform: scale(1.3) rotate(15deg); }
+  60% { opacity: 0.3; transform: scale(0.8) rotate(-10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* Full-screen flash triggered each time the launch-countdown number
+   changes (T-05 -> T-04 -> ... -> LIFTOFF). Re-triggered declaratively by
+   giving the flash element a `key` tied to the countdown digit in
+   JourneyOverlay.tsx, so React remounts it (restarting the animation)
+   exactly on each tick, in either scroll direction. */
+@keyframes countdown-blink {
+  0% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+.animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+.animate-slide-in-right { animation: slide-in-right 0.5s ease-out forwards; }
+.animate-countdown-blink { animation: countdown-blink 0.35s ease-out forwards; }
+.animate-fade-in { animation: text-materialize 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ── Restart Journey cinematic transition ────────────────────────────────
+   Rocket streaks right -> left across the screen with an animated flame
+   trail, a fog layer fades in to fully cover the screen (JourneyProvider
+   resets the journey underneath at that moment), then the fog clears to
+   reveal the reset Hero screen. See RestartTransition.tsx and
+   restartJourney() in JourneyProvider.tsx — RESTART_RESET_MS/RESTART_END_MS
+   there MUST stay in sync with the timings below (1.3s cover / 2.0s total). */
+@keyframes restart-rocket-fly {
+  0%   { right: -480px; opacity: 0; }
+  8%   { opacity: 1; }
+  100% { right: 100%; opacity: 1; }
+}
+
+@keyframes restart-flame-flicker {
+  0%, 100% { transform: scaleX(1) scaleY(1); opacity: 0.9; }
+  50%      { transform: scaleX(1.25) scaleY(0.85); opacity: 0.6; }
+}
+
+@keyframes restart-fog-cover {
+  0%   { opacity: 0; }
+  55%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes restart-fog-clear {
+  0%   { opacity: 1; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.restart-rocket {
+  right: -480px;
+  animation: restart-rocket-fly 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Flicker applied to the flame's <g> inside the rocket SVG (see
+   RestartTransition.tsx). fill-box + a left-edge transform-origin scales
+   the flame out from its attachment point at the engine nozzle, instead
+   of the default SVG viewport-based origin which would scale it off-center. */
+.restart-flame {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: restart-flame-flicker 0.12s ease-in-out infinite;
+}
+
+.restart-fog {
+  background: radial-gradient(circle at 50% 50%, rgba(226,232,240,0.9) 0%, rgba(15,23,42,0.98) 75%);
+  animation:
+    restart-fog-cover 1.3s ease-in forwards,
+    restart-fog-clear 0.7s ease-out 1.3s forwards;
+}
+
+/* ── Reduced motion — disable all custom animations ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-glow-pulse,
+  .animate-fade-in-up,
+  .animate-slide-in-right,
+  .animate-countdown-blink,
+  .animate-fade-in,
+  .restart-rocket,
+  .restart-flame,
+  .restart-fog {
+    animation: none;
+  }
+}
