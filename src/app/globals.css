@@ -423,6 +423,12 @@ body {
 .animate-slide-in-right { animation: slide-in-right 0.5s ease-out forwards; }
 .animate-countdown-blink { animation: countdown-blink 0.35s ease-out forwards; }
 .animate-fade-in { animation: text-materialize 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+/* Note: an earlier draft here (.animate-glitch-r/.animate-glitch-b +
+   @keyframes glitch-slice, a per-tick color-split layer) was superseded
+   before being wired into JourneyOverlay.tsx by a more complete
+   .countdown-glitch-text implementation added independently elsewhere in
+   this project (see the "Countdown 'slow glitch' effect" block further
+   down this file) -- removed here since it was unreferenced dead CSS. */
 
 /* ── Restart Journey cinematic transition ────────────────────────────────
    Rocket streaks right -> left across the screen with an animated flame
@@ -476,6 +482,68 @@ body {
     restart-fog-clear 0.7s ease-out 1.3s forwards;
 }
 
+/* ── Countdown "slow glitch" effect (T-05 → LIFTOFF) ──────────────────
+   A restrained, low-frequency signal-corruption effect for the launch
+   countdown readout. For most of each ~4.5s loop the text renders clean;
+   for a brief (~150-250ms) window near the end of the loop it throws two
+   colour-split ghost copies (violet / cyan, matching the existing
+   --color-accent-violet / --color-accent palette) at a slight offset via
+   the standard data-text pseudo-element technique (JourneyOverlay.tsx sets
+   a matching `data-text` attribute), while the real text's own font-family
+   flickers briefly through the site's other two local faces before
+   settling back on the display face. All three fonts referenced
+   (var(--font-display)=Orbitron, var(--font-mono)=IBM Plex Mono Local,
+   var(--font-ui)=Space Grotesk) are the ones already self-hosted from
+   public/fonts/ via the @font-face rules at the top of this file -- no
+   new font files, no next/font/google. CSS animations always take
+   priority over a plain class's font-family for the duration they run,
+   so this works regardless of which Tailwind font-* utility class (if
+   any) sits on the same element. */
+.countdown-glitch-text {
+  position: relative;
+  display: inline-block;
+  animation: countdown-font-glitch 4.5s infinite steps(1);
+}
+.countdown-glitch-text::before,
+.countdown-glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.countdown-glitch-text::before {
+  color: var(--color-accent-violet);
+  animation: countdown-glitch-before 4.5s infinite linear;
+}
+.countdown-glitch-text::after {
+  color: var(--color-accent);
+  animation: countdown-glitch-after 4.5s infinite linear;
+}
+
+@keyframes countdown-font-glitch {
+  0%, 88% { font-family: var(--font-display); }
+  90% { font-family: var(--font-mono); }
+  92% { font-family: var(--font-ui); }
+  94%, 100% { font-family: var(--font-display); }
+}
+
+@keyframes countdown-glitch-before {
+  0%, 88%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 100% 0); }
+  89% { opacity: 0.75; transform: translate(-3px, 1px); clip-path: inset(10% 0 55% 0); }
+  90.5% { opacity: 0.6; transform: translate(2px, -1px); clip-path: inset(45% 0 20% 0); }
+  92% { opacity: 0.7; transform: translate(-2px, 0); clip-path: inset(70% 0 5% 0); }
+  93.5%, 100% { opacity: 0; }
+}
+
+@keyframes countdown-glitch-after {
+  0%, 88%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(60% 0 0 0); }
+  89.5% { opacity: 0.7; transform: translate(3px, -1px); clip-path: inset(0 0 65% 0); }
+  91% { opacity: 0.6; transform: translate(-2px, 1px); clip-path: inset(30% 0 35% 0); }
+  92.5% { opacity: 0.75; transform: translate(2px, 0); clip-path: inset(5% 0 75% 0); }
+  94%, 100% { opacity: 0; }
+}
+
 /* ── Reduced motion — disable all custom animations ──────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
@@ -486,7 +554,17 @@ body {
   .animate-fade-in,
   .restart-rocket,
   .restart-flame,
-  .restart-fog {
+  .restart-fog,
+  .countdown-glitch-text,
+  .countdown-glitch-text::before,
+  .countdown-glitch-text::after {
     animation: none;
+  }
+  .countdown-glitch-text {
+    font-family: var(--font-display);
+  }
+  .countdown-glitch-text::before,
+  .countdown-glitch-text::after {
+    opacity: 0;
   }
 }

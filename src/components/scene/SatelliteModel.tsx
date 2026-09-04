@@ -7,7 +7,7 @@
  * mission-accurate model per spacecraft (23 total) — with seamless
  * fallback to procedural PBR geometry while a model is loading.
  */
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html, useGLTF } from "@react-three/drei";
@@ -206,42 +206,67 @@ function isPanelLikeName(name: string): boolean {
   );
 }
 
+// Perf fix (Stage 12 audit item #2): the bus-only bounding-box traversal
+// below is expensive (a full mesh traverse + Box3 expansion per call) and
+// its result — centerOffset/scaleFactor — depends only on the SOURCE
+// scene's geometry, which never changes for a given url. Previously this
+// ran fresh on every GLBModel mount, including every time the satellite-
+// evolution scroll swaps `satelliteId` on an already-mounted GLBModel
+// instance (OrbitingSatellite keeps the same component instance alive
+// across transitions, only changing its `url` prop) — so the same GLB's
+// box got re-measured repeatedly over a long scroll session. The actual
+// Object3D clone still happens on every mount (required — the same
+// scene graph can be mounted in more than one place at once, e.g. the
+// hero-orbit Gaganyaan and a later orbiting Gaganyaan instance both exist
+// in the tree simultaneously, just toggled invisible, and Three.js
+// objects can only have one parent), but cloning alone is cheap: THREE's
+// Object3D.clone() shares geometry/material references rather than
+// duplicating buffer data. Caching just the measurement removes the
+// expensive part while keeping every instance's own independent clone.
+const glbTransformCache = new Map<string, { centerOffset: THREE.Vector3; scaleFactor: number }>();
+
 function GLBModel({ url }: { url: string }) {
   const { scene } = useGLTF(url);
   const { normalizedObject, centerOffset, scaleFactor } = useMemo(() => {
     const cloned = scene.clone();
 
-    // Bus-only box: expand across every mesh EXCEPT ones whose name
-    // matches the panel heuristic above, so a satellite's panel span can
-    // never influence the bus's own normalized size.
-    const busBox = new THREE.Box3();
-    let hasBusGeometry = false;
-    cloned.traverse((child) => {
-      if (!(child instanceof THREE.Mesh)) return;
-      if (isPanelLikeName(child.name)) return;
-      busBox.expandByObject(child);
-      hasBusGeometry = true;
-    });
-    // Fallback: if a GLB has no name metadata (or every mesh happens to
-    // match the panel heuristic), fall back to the full-model box rather
-    // than normalizing against an empty/degenerate one.
-    const box = hasBusGeometry ? busBox : new THREE.Box3().setFromObject(cloned);
+    let cached = glbTransformCache.get(url);
+    if (!cached) {
+      // Bus-only box: expand across every mesh EXCEPT ones whose name
+      // matches the panel heuristic above, so a satellite's panel span can
+      // never influence the bus's own normalized size.
+      const busBox = new THREE.Box3();
+      let hasBusGeometry = false;
+      scene.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return;
+        if (isPanelLikeName(child.name)) return;
+        busBox.expandByObject(child);
+        hasBusGeometry = true;
+      });
+      // Fallback: if a GLB has no name metadata (or every mesh happens to
+      // match the panel heuristic), fall back to the full-model box rather
+      // than normalizing against an empty/degenerate one.
+      const box = hasBusGeometry ? busBox : new THREE.Box3().setFromObject(scene);
 
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-    const maxDim = Math.max(size.x, size.y, size.z);
-    // Guard against a degenerate/empty bounding box -- fall back to no
-    // rescale rather than dividing by zero or producing a NaN/Infinity
-    // scale that would vanish the model.
-    const safeMaxDim = Number.isFinite(maxDim) && maxDim > 1e-6 ? maxDim : NORMALIZED_BUS_SIZE;
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+      const maxDim = Math.max(size.x, size.y, size.z);
+      // Guard against a degenerate/empty bounding box -- fall back to no
+      // rescale rather than dividing by zero or producing a NaN/Infinity
+      // scale that would vanish the model.
+      const safeMaxDim = Number.isFinite(maxDim) && maxDim > 1e-6 ? maxDim : NORMALIZED_BUS_SIZE;
+      cached = { centerOffset: center, scaleFactor: NORMALIZED_BUS_SIZE / safeMaxDim };
+      glbTransformCache.set(url, cached);
+    }
+
     return {
       normalizedObject: cloned,
-      centerOffset: center,
-      scaleFactor: NORMALIZED_BUS_SIZE / safeMaxDim,
+      centerOffset: cached.centerOffset,
+      scaleFactor: cached.scaleFactor,
     };
-  }, [scene]);
+  }, [scene, url]);
 
   return (
     <group scale={scaleFactor}>
@@ -779,6 +804,22 @@ export function OrbitLine({
     obj.renderOrder = -1;
     return obj;
   }, [radius, inclination, eccentricity, segments, color]);
+
+  // Perf fix (Stage 12 audit item #10): <primitive> mounts an existing
+  // object as-is — unlike JSX-managed geometry/material props elsewhere
+  // in this codebase (e.g. LaunchSmoke/TransformationParticles' <points
+  // geometry={...}>), R3F does NOT auto-dispose objects passed via
+  // <primitive> on unmount, since it can't assume they're safe to free
+  // (they might be shared). This `line`'s geometry/material are freshly
+  // created above and never shared elsewhere, so they're safe to dispose
+  // explicitly whenever a new `line` replaces this one (radius/
+  // inclination/eccentricity/segments/color change) or on final unmount.
+  useEffect(() => {
+    return () => {
+      line.geometry.dispose();
+      (line.material as THREE.Material).dispose();
+    };
+  }, [line]);
 
   return <primitive object={line} />;
 }

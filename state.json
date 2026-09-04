@@ -1,14 +1,70 @@
 {
   "project": {
-    "name": "India's Journey Beyond Earth",
+    "name": "Stellar Path",
     "description": "3D Interactive Satellite Explorer — An immersive scroll-controlled 3D visualization of India's satellite and space-mission history",
     "version": "1.0.0",
     "framework": "Next.js 16.3.1 (React 19, Three.js, React Three Fiber, GSAP, Tailwind CSS v4)",
-    "lastUpdated": "2026-09-01T00:00:00+05:30",
+    "lastUpdated": "2026-09-04T00:00:00+05:30",
     "repository": "d:/projects/space"
   },
 
   "changeLog": [
+    {
+      "date": "04/09/2026",
+      "summary": "Added a continuous slow-glitch effect to the launch countdown (T-05\u2192LIFTOFF), cycling through the project's three local font files (this chat session, filesystem-only access)",
+      "changes": [
+        "Added .countdown-glitch-text (globals.css): a restrained, low-frequency effect that runs for as long as the countdown block is mounted (the whole T-05\u2192LIFTOFF span, not just per-digit) -- for most of each ~4.5s loop the text renders clean, then for a brief ~150-250ms window it throws two colour-split ghost copies (violet/cyan, matching the existing --color-accent-violet/--color-accent palette) at a slight offset via the standard data-text pseudo-element technique, while the real text's font-family flickers briefly through the site's other two local faces before settling back on the display face",
+        "Font cycling uses only the three faces already self-hosted from public/fonts/ via the existing @font-face rules -- var(--font-display)=Orbitron, var(--font-mono)=IBM Plex Mono Local, var(--font-ui)=Space Grotesk -- no new font files added or requested",
+        "Wired into JourneyOverlay.tsx: added data-text={COUNTDOWN_STAGES[countdownIndex]} (mirroring the visible text, needed for the ghost-copy pseudo-elements' content: attr(data-text)) and the countdown-glitch-text class on the countdown <p>, removing the old font-technical class since the glitch animation now owns font-family for that element for its whole mount duration",
+        "Added countdown-glitch-text and its ::before/::after to the existing prefers-reduced-motion disable block (globals.css) -- reduced-motion users get static Orbitron text with both ghost layers permanently hidden (opacity: 0), consistent with every other custom animation in this file",
+        "Not verified visually in this session (filesystem-only access, no execution capability) -- should be spot-checked once running: that the glitch reads as 'slow' (infrequent, brief bursts) rather than distracting/constant, that the three fonts are visually distinct enough during the flicker to register, and that prefers-reduced-motion correctly leaves the text fully static"
+      ]
+    },
+    {
+      "date": "04/09/2026",
+      "summary": "Stage 11 (Responsive Behaviour) of the staged UI-transformation plan: code-level audit against all 6 required breakpoints, one fix applied, two risks flagged pending approval (this chat session, filesystem-only access)",
+      "changes": [
+        "Audited JourneyOverlay.tsx, Navigation.tsx, HeroOverlay.tsx, LoadingScreen.tsx, and globals.css against the instructions' 6 target widths (1920/1440/1024/768/430/390) by reading the actual responsive classes/breakpoints rather than running the dev server (filesystem-only access, no execution capability)",
+        "Fixed: the center-screen launch-countdown text (T-05...LIFTOFF, JourneyOverlay.tsx) had no width constraint and only one font-size step (text-5xl sm:text-6xl, tracking-[0.15em]) -- at 390px/430px this risked 'LIFTOFF' (7 characters at that size/tracking) running to or past the viewport edge. Added a max-w-xs px-4 safe area (sm:max-w-none above 640px, matching the pattern already used by the launch-phase header) plus a smaller mobile-only size/tracking step (text-4xl tracking-[0.08em] below sm, easing up to the original 5xl/6xl from sm/md upward) -- desktop/tablet appearance unchanged",
+        "Caught and fixed my own mistake in the same edit: first attempt used '//' line comments directly as JSX children, which is invalid TSX syntax (only {/* */} block comments are valid there) and would have broken the build -- corrected before considering the change complete",
+        "Flagged, NOT fixed pending approval (a design-intent question, not a bounded bug): JourneyOverlay.tsx's in-journey Flight Telemetry HUD (bottom-left) is 'hidden sm:block', fully invisible below 640px (i.e. at both required mobile widths 390/430) -- inconsistent with HeroOverlay.tsx's own pre-journey Mission HUD, whose comment explicitly documents a decision to keep it 'visible (not hidden) down to small mobile widths ... just narrower'. Need a decision: shrink the in-journey Telemetry HUD to fit mobile (matching Hero's approach) or leave it intentionally hidden there",
+        "Flagged, NOT fixed pending approval: the satellite-mission-naming block (top-[84%] sm:top-[80%]) was already self-documented by an earlier Stage 9 session as sitting close to the bottom-anchored Telemetry HUD/Free-3D-View button on short/mobile viewports. Since the Telemetry HUD is fully hidden below 640px per the point above, the real remaining overlap risk is viewport heights in roughly the 640-767px range (telemetry visible there, sm: top-80% position also active) -- not one of the 6 required test widths exactly, but adjacent to them and worth a manual check",
+        "Not verified in this session (filesystem-only access, no execution capability) -- the countdown-text fix and both flagged risks above should be spot-checked once running, specifically at 390px and 430px widths during the T-05-LIFTOFF countdown, and at reduced viewport heights around 640-767px during the satellite-evolution phase"
+      ]
+    },
+    {
+      "date": "03/09/2026",
+      "summary": "Stage 10 (Holographic Details) of the staged UI-transformation plan: added a small decorative object-tracking reticle plus altitude readout badge to the satellite-naming HUD (this chat session, filesystem-only access)",
+      "changes": [
+        "The existing bottom-left Telemetry HUD panel already covered most of this stage's target data (velocity, altitude, inclination, status) from earlier Stage 3-8 work, so the only genuine gap was a targeting-reticle visual cue -- added one small new badge to JourneyOverlay.tsx's satellite-naming badge row: a soft pulsing dot (Tailwind's built-in animate-ping, no new CSS/keyframes needed) plus a compact altitude readout, styled muted/restrained to match the existing trajectory/category badges rather than a large targeting graphic",
+        "Added a small getAltitudeLabel() helper (JourneyOverlay.tsx) mirroring the same orbitType-based fallback values already used inline in the Telemetry HUD panel further down the same file -- kept as its own separate helper rather than refactoring that existing inline ternary, to keep this addition isolated and low-risk",
+        "The new badge's dynamic altitude text is keyed per-satellite and reuses the same animate-fade-in text-materialize treatment as the other badges (consistent with the Stage 9 morph pattern), while the reticle dot's pulse runs continuously and does not restart on satellite change",
+        "Explicitly NOT implemented: a reticle that visually tracks the satellite's actual on-screen position -- the satellite orbits within a fixed camera frame in the 3D scene (JourneyScene.tsx), and its exact screen-space position is not available to this 2D overlay component, so overlaying a crosshair precisely on the moving 3D object would need new position-tracking plumbing between the 3D and 2D layers, a larger architectural change beyond this stage's decorative-detail scope",
+        "Not verified visually in this session (filesystem-only access, no execution capability) -- should be spot-checked once running: the new badge reads clearly at both breakpoints, does not crowd the existing two badges on narrow viewports (flex-wrap should handle it), and the pulse animation stays subtle rather than distracting"
+      ]
+    },
+    {
+      "date": "03/09/2026",
+      "summary": "Stage 9 (Metamorphic UI Transitions) of the staged UI-transformation plan: replaced a full remount-on-change pattern in the satellite-naming HUD with a persistent frame + eased color transitions (this chat session, filesystem-only access)",
+      "changes": [
+        "JourneyOverlay.tsx's Satellite Mission Naming block (trajectory badge, category badge, satellite name, year, launch vehicle) previously carried one key={activeSatelliteData.id} on its outer wrapper, so React fully unmounted/remounted the entire frame -- badges, borders, everything -- on every satellite change (a hard disappear/reappear, not a morph). Removed that outer key so the frame stays mounted continuously across satellite changes; added transition-colors duration-500 ease-out to both badge spans so a changed orbitType/category value now EASES between its old and new border/background/text color instead of popping",
+        "Kept a genuine 'new content' cue by moving the remount-on-change key down to just the inner text nodes (badge label, category label, satellite name, year, launch vehicle) -- each still replays the existing 700ms text-materialize effect (animate-fade-in, within the requested 300-800ms range) individually, while the surrounding frame no longer disappears",
+        "Confirmed already-satisfied elsewhere and left untouched: the right-side progress-dot rail (stable per-dot key, transition-all duration-300 already eases size/color/glow on active/past/future state change -- no remount involved)",
+        "Deliberately out of scope for this stage: SatelliteDetails.tsx's modal (no prev/next satellite navigation exists yet to morph between while open -- would be a feature addition, not a bounded Stage 9 fix) and the 3D orbital line in JourneyScene.tsx (already lerp-eased per earlier fix.md work; belongs to the 3D/Three.js layer, not this stage's 2D UI scope)",
+        "Not verified visually in this session (filesystem-only access, no execution capability) -- should be spot-checked by scrolling through a few satellite transitions, especially ones crossing orbit types (e.g. into Chandrayaan-1/Lunar or Mars Orbiter Mission), to confirm the badge color eases smoothly instead of popping"
+      ]
+    },
+    {
+      "date": "03/09/2026",
+      "summary": "Renamed the website from 'India's Journey Beyond Earth' to 'Stellar Path' (Stage 1 of a staged UI-transformation plan), then adjusted the nav wordmark to one line / one font per follow-up requests (this chat session, filesystem-only access)",
+      "changes": [
+        "Stage 1 branding rename: updated user-facing title/metadata (layout.tsx: <title>, OpenGraph title, keywords list now also includes 'Stellar Path'), the nav brand mark (Navigation.tsx), and the Hero/Loading screen titles (HeroOverlay.tsx, LoadingScreen.tsx) from 'INDIA'S JOURNEY' / 'BEYOND EARTH' to 'STELLAR' / 'PATH'. Left internal file-header doc comments, the 'WITNESS THE JOURNEY' CTA, and all body copy describing India's space history content untouched per the instructions' 'user-facing branding only' scope. No data, logic, 3D, or scroll files touched",
+        "Nav wordmark iteration per follow-up requests: first split 'STELLAR' (font-display/Orbitron) and 'PATH' (font-technical/IBM Plex Mono) onto one line instead of two stacked lines; then, on correction that STELLAR PATH is one name rather than two separate words needing different fonts, changed both words to the same font-display/Orbitron family (white for STELLAR, cyan for PATH, weight/tracking now identical) (Navigation.tsx)",
+        "Updated this file's project.name from 'India's Journey Beyond Earth' to 'Stellar Path' to match; project.description was left as-is since it describes the site's subject matter (India's space history), not its product name",
+        "Not verified visually in this session (filesystem-only access, no execution capability) -- should be spot-checked once running: browser tab title, nav wordmark at all breakpoints (it is now wider than the old stacked version), hero screen, and loading screen",
+        "Stage 2 (logo integration using public/logo/logo2.svg) and all later stages of the staged UI-transformation plan (stellar_path_claude_instructions.md) remain not yet started"
+      ]
+    },
     {
       "date": "01/09/2026",
       "summary": "Increased Aditya-L1's satellite model size against the Sun, and fixed a camera-lerp bug where the Sun-to-Earth return transition took much longer than intended (this chat session, filesystem-only access)",

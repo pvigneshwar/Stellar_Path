@@ -113,6 +113,11 @@ export function JourneyOverlay() {
   let activeLaunchLabelIndex = -1;
   let activeSatelliteData: (typeof SATELLITES)[0] | null = null;
   let activeJourneySat: (typeof JOURNEY_SATELLITES)[0] | null = null;
+  // Stage 7 (scrollytelling enhancement) — index into JOURNEY_SATELLITES
+  // for the new right-edge progress rail below. Lifted out of the `else`
+  // branch's local `satIndex` const so it's readable from the render
+  // return further down; does not change how satIndex itself is derived.
+  let activeSatelliteIndex = -1;
 
   if (p < 1.0) {
     for (let i = 0; i < LAUNCH_LABELS.length; i++) {
@@ -129,6 +134,7 @@ export function JourneyOverlay() {
       Math.floor(evoProgress / SATELLITE_TRANSITION_BAND),
       JOURNEY_SATELLITES.length - 1
     );
+    activeSatelliteIndex = satIndex;
     activeJourneySat = JOURNEY_SATELLITES[satIndex] ?? null;
     if (activeJourneySat) {
       activeSatelliteData = SATELLITES.find((s) => s.id === activeJourneySat?.id) ?? null;
@@ -167,6 +173,25 @@ export function JourneyOverlay() {
         return { label: "Geostationary Synchronous Orbit", color: "border-purple-500/40 text-purple-400 bg-purple-950/40" };
       default:
         return { label: "Low Earth Orbit (LEO)", color: "border-blue-500/40 text-blue-400 bg-blue-950/40" };
+    }
+  };
+
+  // Stage 10 (Holographic Details) — compact altitude readout for the new
+  // small "object tracking" badge below, mirroring the same orbitType-based
+  // fallback values already used in the Telemetry HUD panel further down.
+  // Kept as its own small helper rather than refactoring that existing
+  // inline ternary, so this addition stays isolated and low-risk.
+  const getAltitudeLabel = (sat: (typeof SATELLITES)[0]) => {
+    if (sat.orbitAltitude) return `${sat.orbitAltitude.toLocaleString()} KM`;
+    switch (sat.orbitType.toUpperCase()) {
+      case "LUNAR":
+        return "384,400 KM";
+      case "MARS":
+        return "225M KM";
+      case "L1":
+        return "1.5M KM";
+      default:
+        return "600 KM";
     }
   };
 
@@ -245,26 +270,70 @@ export function JourneyOverlay() {
           it here would undo that earlier fix. */}
       <div className="absolute top-[84%] sm:top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-xl px-4">
         {activeSatelliteData && (
-          // key={activeSatelliteData.id}: same remount-on-change trick as
-          // the launch label above, so the text-materialize effect
-          // replays for every satellite transition, not just the first.
-          <div key={activeSatelliteData.id} className="animate-fade-in transition-all duration-300">
-            <div className="flex items-center justify-center gap-2">
+          // Stage 9 (metamorphic transitions): this wrapper no longer carries
+          // a per-satellite `key`, so React keeps the SAME frame mounted
+          // across satellite changes instead of tearing it down and
+          // rebuilding it -- the badge borders/backgrounds below now carry
+          // `transition-colors duration-500` so a changed orbitType/category
+          // value EASES between its old and new color instead of popping.
+          // Only the actual label/name/year/vehicle TEXT still remounts (via
+          // its own small key + the existing animate-fade-in/text-materialize
+          // effect, 700ms, within the 300-800ms range), so the reader still
+          // gets a clear "new content" cue without the whole panel
+          // disappearing and reappearing.
+          <div className="transition-all duration-500 ease-out">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <span
-                className={`hud-bracket inline-flex items-center gap-1.5 border px-3 py-0.5 text-[11px] font-technical font-semibold uppercase tracking-[0.18em] ${
+                className={`hud-bracket inline-flex items-center gap-1.5 border px-3 py-0.5 text-[11px] font-technical font-semibold uppercase tracking-[0.18em] transition-colors duration-500 ease-out ${
                   getTrajectoryBadge(activeSatelliteData.orbitType).color
                 }`}
               >
                 <Orbit className="h-3 w-3 animate-spin-slow" />
-                {getTrajectoryBadge(activeSatelliteData.orbitType).label}
+                <span key={`${activeSatelliteData.id}-badge`} className="animate-fade-in">
+                  {getTrajectoryBadge(activeSatelliteData.orbitType).label}
+                </span>
+              </span>
+              {/* Stage 7 — mission category, from the same satellites.ts
+                  record already being read for name/year/launchVehicle above.
+                  Plain slate styling (not a trajectory color) so it doesn't
+                  compete with the orbit badge for attention. */}
+              <span className="hud-bracket inline-flex items-center border border-slate-500/25 bg-slate-950/50 px-3 py-0.5 text-[11px] font-technical font-semibold uppercase tracking-[0.18em] text-slate-300 transition-colors duration-500 ease-out">
+                <span key={`${activeSatelliteData.id}-category`} className="animate-fade-in">
+                  {activeSatelliteData.category.replace("-", " ")}
+                </span>
+              </span>
+              {/* Stage 10 (Holographic Details) — a small decorative
+                  "object tracking" indicator: a soft pulsing reticle dot
+                  (Tailwind's built-in animate-ping, no new keyframes needed)
+                  plus a compact altitude readout, styled muted/restrained
+                  per the instructions' "subtle HUD" guidance rather than a
+                  large targeting graphic. Decorative only — does not track
+                  the satellite's actual on-screen position, since the
+                  camera-relative screen position isn't available here. */}
+              <span className="hud-bracket inline-flex items-center gap-1.5 border border-cyan-500/20 bg-slate-950/50 px-3 py-0.5 text-[11px] font-technical font-semibold uppercase tracking-[0.18em] text-cyan-300/80">
+                <span className="relative inline-flex h-2 w-2" aria-hidden="true">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-cyan-400/60 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+                </span>
+                <span key={`${activeSatelliteData.id}-tracking`} className="animate-fade-in">
+                  Tracking · {getAltitudeLabel(activeSatelliteData)}
+                </span>
               </span>
             </div>
             <h3 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white drop-shadow-[0_0_14px_rgba(0,180,255,0.3)]">
-              {activeSatelliteData.name}
+              <span key={activeSatelliteData.id} className="inline-block animate-fade-in">
+                {activeSatelliteData.name}
+              </span>
             </h3>
             <p className="mt-1 text-sm text-slate-300">
-              Launched in <span className="font-semibold text-cyan-400">{activeSatelliteData.year}</span> via{" "}
-              <span className="font-semibold text-slate-200">{activeSatelliteData.launchVehicle}</span>
+              Launched in{" "}
+              <span key={`${activeSatelliteData.id}-year`} className="inline-block font-semibold text-cyan-400 animate-fade-in">
+                {activeSatelliteData.year}
+              </span>{" "}
+              via{" "}
+              <span key={`${activeSatelliteData.id}-vehicle`} className="inline-block font-semibold text-slate-200 animate-fade-in">
+                {activeSatelliteData.launchVehicle}
+              </span>
             </p>
           </div>
         )}
@@ -279,8 +348,31 @@ export function JourneyOverlay() {
           where the viewer's eye already is, since the rocket itself isn't
           visible yet to look at (it's still inside the globe). */}
       {countdownIndex >= 0 && (
-        <div className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center animate-fade-in">
-          <p className="font-technical text-5xl sm:text-6xl font-bold tracking-[0.15em] text-cyan-300 drop-shadow-[0_0_18px_rgba(0,200,255,0.4)]">
+        /* Stage 11 (responsive audit): this block previously had no width
+           constraint and only one font-size step (text-5xl sm:text-6xl).
+           At the 390px/430px mobile breakpoints, "LIFTOFF" (7 chars) at
+           3rem with tracking-[0.15em] ran close to/at the viewport edge.
+           Added a max-w/px-4 safe area (matching the pattern already used
+           by the launch-label header above) and a smaller mobile-only font
+           size + tighter tracking, both easing up to the original 5xl/6xl
+           values from sm: upward -- unchanged on tablet/laptop/desktop. */
+        <div className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xs px-4 text-center animate-fade-in sm:max-w-none">
+          {/* countdown-glitch-text (globals.css) runs continuously for as
+              long as this block is mounted (i.e. the whole T-05→LIFTOFF
+              span, not just on each digit change): a slow, low-frequency
+              chromatic-split glitch that also flickers the text's own
+              font-family briefly through the site's other two local faces
+              (IBM Plex Mono Local, Space Grotesk) before settling back on
+              the display face (Orbitron) -- all three are the fonts
+              already self-hosted from public/fonts/, no new assets.
+              data-text mirrors the visible content so the two ghost-copy
+              pseudo-elements have something to render; dropped the old
+              font-technical class since the glitch animation now owns
+              font-family for this element. */}
+          <p
+            data-text={COUNTDOWN_STAGES[countdownIndex]}
+            className="countdown-glitch-text text-4xl font-bold tracking-[0.08em] text-cyan-300 drop-shadow-[0_0_18px_rgba(0,200,255,0.4)] sm:text-5xl sm:tracking-[0.15em] md:text-6xl"
+          >
             {COUNTDOWN_STAGES[countdownIndex]}
           </p>
         </div>
@@ -315,6 +407,32 @@ export function JourneyOverlay() {
           Instrument-panel framing (hud-panel + hud-bracket corners) in
           place of the rounded glassmorphism card, matching a mission-
           control console rather than a floating app widget. */}
+      {p >= 1.0 && activeSatelliteIndex >= 0 && (
+        <div className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-3 pointer-events-none">
+          <span className="font-technical text-[10px] tracking-[0.15em] text-slate-400">
+            {String(activeSatelliteIndex + 1).padStart(2, "0")}/{JOURNEY_SATELLITES.length}
+          </span>
+          <div className="flex flex-col items-center gap-1.5">
+            {JOURNEY_SATELLITES.map((sat, i) => {
+              const isActive = i === activeSatelliteIndex;
+              const isPast = i < activeSatelliteIndex;
+              return (
+                <span
+                  key={sat.id}
+                  className={`block rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "h-2.5 w-2.5 bg-cyan-400 shadow-[0_0_8px_rgba(0,212,255,0.8)]"
+                      : isPast
+                        ? "h-1 w-1 bg-slate-300/70"
+                        : "h-1 w-1 bg-slate-600/40"
+                  }`}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="absolute bottom-8 left-8 sm:bottom-10 sm:left-10 hidden sm:block">
         <div className="hud-panel hud-bracket p-4 w-64">
           <div className="flex items-center justify-between border-b border-white/10 pb-2">

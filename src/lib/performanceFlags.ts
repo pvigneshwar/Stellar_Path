@@ -11,8 +11,8 @@
 export const PERFORMANCE_FLAGS = {
   adaptiveDpr: true,       // Phase 2: cap DPR by performance mode
   adaptiveShadows: true,   // Phase 3: gate shadow maps by performance mode
-  adaptiveTextures: false, // Phase 5: use 2K/4K texture variants instead of 8K originals
-  stagedGlbPreload: false,  // Phase 6: sliding-window GLB preload instead of full preload
+  adaptiveTextures: true,  // Phase 5: use 2K/4K texture variants instead of 8K originals
+  stagedGlbPreload: true,   // Phase 6: sliding-window GLB preload instead of full preload
 } as const;
 
 /**
