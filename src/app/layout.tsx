@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   description:
     "Travel through India's space history in an immersive scroll-controlled 3D journey — from Aryabhata to Chandrayaan-3 and beyond.",
   keywords: ["ISRO", "India space", "satellite", "3D", "Chandrayaan", "Aryabhata", "Mars Orbiter", "Stellar Path"],
+  icons: {
+    icon: "/icon.svg",
+  },
   openGraph: {
     title: "Stellar Path",
     description: "An interactive 3D visualization of India's satellite and space-mission history.",
