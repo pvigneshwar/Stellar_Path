@@ -30,7 +30,7 @@ export function Navigation() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 px-4 py-3 sm:px-8">
-      <div className="hud-panel hud-bracket mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6">
+      <div className="hud-panel hud-bracket mx-auto flex max-w-7xl items-center justify-between gap-2 px-2.5 py-2 sm:gap-0 sm:px-6">
         {/* Brand / Mission insignia — official Stellar Path mark. This is a
             compact ~21KB nav-specific export (200×175, WebP re-encode
             wrapped in the same SVG-embedded-image pattern used by the
@@ -61,21 +61,22 @@ export function Navigation() {
 
         {/* Nav Links — rectangular selectors, active state marked with a
             bottom-edge accent line rather than a glowing filled pill. */}
-        <nav className="flex items-center gap-0.5 sm:gap-1">
+        <nav className="flex flex-shrink-0 items-center gap-0 sm:gap-1">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`relative flex items-center gap-1.5 border-b-2 px-3 py-1.5 text-xs font-technical uppercase tracking-wider transition-all sm:text-[13px] sm:px-4 sm:py-2 ${
+                aria-label={label}
+                className={`relative flex items-center gap-1.5 border-b-2 px-2 py-1.5 text-xs font-technical uppercase tracking-wider transition-all sm:text-[13px] sm:px-4 sm:py-2 ${
                   isActive
                     ? "border-cyan-400 text-white"
                     : "border-transparent text-gray-400 hover:text-white hover:border-white/20"
                 }`}
               >
                 <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isActive ? "text-cyan-400" : ""}`} />
-                <span className="hidden xs:inline sm:inline">{label}</span>
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}

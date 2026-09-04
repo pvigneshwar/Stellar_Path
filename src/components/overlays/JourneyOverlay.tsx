@@ -257,18 +257,19 @@ export function JourneyOverlay() {
           occupies roughly the middle ~40% of viewport height at the
           camera's fixed distance/FOV. top-[68%] sits safely below that
           disk while still clearing the bottom-anchored Telemetry HUD and
-          Free 3D View Movement button (both bottom-8/10). Nudged down twice
-          now per follow-up requests (68%/64% -> 76%/72% -> 84%/80%) so it
-          reads clearly as sitting below Earth's disk rather than crowding
-          its lower edge; still checked against the bottom-8/10 HUD elements
-          at each step — 84%/80% is close to that floor on short/mobile
-          viewports, so a further push down from here would need shrinking
-          or hiding the bottom HUD first rather than just raising the
-          percentage again. The launch-phase
+          Free 3D View Movement button. Nudged down twice per follow-up
+          requests (68%/64% -> 76%/72% -> 84%/80%), but 84% on mobile
+          collided with the button (bottom-8 at the time) on short
+          viewports, so mobile was pulled back up to 72% and the button
+          itself moved to bottom-20 (mobile only) with a shortened
+          "Free View" label to free up room in that corner — sm: and up
+          stay at 80%/bottom-10 unchanged. If this needs to move again,
+          check both sides of that gap together rather than only this
+          value. The launch-phase
           header above is intentionally left at its own top position —
           that one has to stay clear of the ROCKET, not Earth, and moving
           it here would undo that earlier fix. */}
-      <div className="absolute top-[84%] sm:top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-xl px-4">
+      <div className="absolute top-[72%] sm:top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-xl px-4">
         {activeSatelliteData && (
           // Stage 9 (metamorphic transitions): this wrapper no longer carries
           // a per-satellite `key`, so React keeps the SAME frame mounted
@@ -393,13 +394,14 @@ export function JourneyOverlay() {
           type="button"
           onClick={toggleFreeView}
           style={{ position: "fixed", zIndex: 9999 }}
-          className={`hud-panel hud-bracket pointer-events-auto bottom-8 right-8 sm:bottom-10 sm:right-10 flex items-center gap-2 px-4 py-2.5 font-technical text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors ${
+          className={`hud-panel hud-bracket pointer-events-auto bottom-20 right-4 sm:bottom-10 sm:right-10 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 font-technical text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors ${
             freeView ? "text-cyan-300" : "text-slate-300 hover:text-cyan-300"
           }`}
           aria-pressed={freeView}
         >
           <RotateCw className={`h-3.5 w-3.5 ${freeView ? "animate-spin-slow" : ""}`} />
-          {freeView ? "Free 3D View Movement: On" : "Free 3D View Movement"}
+          <span className="sm:hidden">{freeView ? "Free View: On" : "Free View"}</span>
+          <span className="hidden sm:inline">{freeView ? "Free 3D View Movement: On" : "Free 3D View Movement"}</span>
         </button>
       )}
 
