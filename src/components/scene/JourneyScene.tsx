@@ -1643,6 +1643,21 @@ function OrbitingSatellite({
   progress: number;
 }) {
   const ref = useRef<THREE.Group>(null!);
+  // Bug fix (mobile: "satellite information is hiding it" — the LEO/GEO
+  // satellite's vertical swing carried it down into the same screen
+  // region JourneyOverlay's mission-name/telemetry HUD occupies
+  // (top-[72%] on mobile), so the 2D text panel visually covered the 3D
+  // satellite for a large part of every orbit on narrow/portrait
+  // viewports. Desktop never had this problem because its HUD sits
+  // lower (sm:top-[80%]) with more headroom above it. Rather than move
+  // the HUD again (already tuned once to avoid the Free View button —
+  // see JourneyOverlay's comment), keep the satellite's on-screen
+  // vertical excursion smaller on narrow aspect ratios so it stays
+  // clear of that HUD zone; horizontal (x) and depth (z) motion, which
+  // read as the actual "orbiting" motion, are untouched, and desktop's
+  // wider aspect keeps the original, more dramatic vertical swing.
+  const { size } = useThree();
+  const isNarrowViewport = size.width / size.height < 0.65;
 
   useFrame(() => {
     if (!ref.current) return;
@@ -1726,20 +1741,26 @@ function OrbitingSatellite({
       );
       ref.current.rotation.y = t * SPIN_RATIO_UNIFORM;
     } else if (orbitType === "geo") {
-      // Geostationary Orbit
+      // Geostationary Orbit — y-multiplier reduced on narrow viewports
+      // (see isNarrowViewport comment above) so it doesn't swing down
+      // into the mobile HUD's text zone.
       const r = SAT_ORBIT_GEO_R;
+      const geoYMult = isNarrowViewport ? 0.14 : 0.25;
       ref.current.position.set(
         Math.cos(t) * r,
-        Math.sin(t) * r * 0.25,
+        Math.sin(t) * r * geoYMult,
         Math.sin(t) * r * 0.95
       );
       ref.current.rotation.y = t * SPIN_RATIO_UNIFORM;
     } else {
-      // LEO Orbit (fast, inclined)
+      // LEO Orbit (fast, inclined) — y-multiplier reduced on narrow
+      // viewports (see isNarrowViewport comment above) so it doesn't
+      // swing down into the mobile HUD's text zone.
       const r = SAT_ORBIT_LEO_R;
+      const leoYMult = isNarrowViewport ? 0.45 : 0.8;
       ref.current.position.set(
         Math.cos(t) * r,
-        Math.sin(t) * r * 0.8,
+        Math.sin(t) * r * leoYMult,
         Math.sin(t) * r * 0.55
       );
       ref.current.rotation.y = t * SPIN_RATIO_UNIFORM;
