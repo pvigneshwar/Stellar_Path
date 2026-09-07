@@ -132,10 +132,30 @@ const CAMERA_SPACE: [number, number, number] = [0, 8, 8];
 // globe — see SAT_ORBIT_* / SatelliteEvolution below). Offset chosen so
 // the camera sits far enough back to keep the largest orbit (Mars,
 // radius SAT_ORBIT_MARS_A=15) inside frame alongside Earth itself.
+//
+// Bug fix (mobile: "satellite disappears at the edge of its orbit"):
+// the offset below was originally sized only against the camera's
+// VERTICAL fov (50°). A PerspectiveCamera's HORIZONTAL fov is narrower
+// on a portrait/narrow-aspect viewport — exactly the same
+// horizontalHalfWidth = distance * aspect * tan(verticalFov/2) issue
+// already documented and fixed below for MOON_CAM_OFFSET/
+// MARS_CAM_OFFSET/SUN_CAM_OFFSET, just never applied here too. At the
+// previous distance (~35.4 from EARTH_POS), a typical mobile aspect of
+// ~0.5 gives a horizontal half-width of only ~8 world units — less than
+// the LEO orbit's own x-swing (SAT_ORBIT_LEO_R=8.6) and well short of
+// GEO's (SAT_ORBIT_GEO_R=10.8), so the satellite fell outside the
+// horizontal frustum and disappeared at the left/right extremes of its
+// orbit on any narrow-aspect screen, even though it stayed within the
+// vertical bounds the whole time. Using the same
+// `distance * 0.5 * tan(25°) ≈ orbitRadius * 1.2-margin` sizing as the
+// destination-body offsets, against the larger of the two orbits this
+// camera serves (GEO, 10.8): needs d≈56, scaled up from the previous
+// ~35.4 (factor ≈1.6) along the same direction/elevation so the shot's
+// framing angle is unchanged, just pulled back further.
 const CAMERA_SATELLITE: [number, number, number] = [
   EARTH_POS[0],
-  EARTH_POS[1] + 10,
-  EARTH_POS[2] + 34,
+  EARTH_POS[1] + 16,
+  EARTH_POS[2] + 54,
 ];
 
 // ── Destination celestial bodies (Moon, Mars, Sun/L1) ───────────────────
